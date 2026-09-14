@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.zmad.sevensegment"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.zmad.sevensegment"
@@ -19,6 +19,20 @@ android {
         release {
             // There is no code to keep, so R8 strips the generated R class and leaves a dex-free APK.
             isMinifyEnabled = true
+            isShrinkResources = true
         }
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding = true
+    }
+    dependenciesInfo {
+        includeInApk = true
+        includeInBundle = true
+    }
+    buildToolsVersion = "36.1.0"
+    ndkVersion = "29.0.14206865"
 }
