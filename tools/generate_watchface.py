@@ -68,6 +68,8 @@ GHOST_ALPHA = 36  # unlit segments of the large time digits, out of 255
 # The thin date/seconds segments sit next to bright lit ones and vanish at the
 # same alpha (silver at 36 is only #191919), so they get a stronger level.
 SMALL_GHOST_ALPHA = 72
+# The battery meter's 4px segments need more still to be visible on the watch.
+BATTERY_GHOST_ALPHA = 120
 AMBIENT_LIT_ALPHA = 170  # lit segments while in always-on mode
 AMBIENT_BATTERY_ALPHA = 140
 
@@ -145,20 +147,69 @@ DATE_X_WITH_SECONDS = TIME_X
 DATE_X_CENTERED = (CANVAS - DATE_WIDTH) // 2
 SECONDS_X = TIME_RIGHT - SECONDS_WIDTH
 
-# Horizontal battery glyph + "NN%" above the time, drawn from [BATTERY_PERCENT].
-BATTERY_BODY = Rect(172, 100, 40, 22, corner=6)
-BATTERY_STROKE = 3
-BATTERY_TEXT = Rect(BATTERY_BODY.x + BATTERY_BODY.w + 14, 93, 90, 36)
-BATTERY_TEXT_SIZE = 26
+# LCD-style battery meter above the time: a battery outlined in segment pills
+# with five charge bars, then the level in small 7-segment digits and a "%".
+BATTERY_Y = 92
+BATTERY_H = 32
+BATTERY_T = 4  # segment thickness
+BATTERY_W = 58
+BATTERY_BARS = 5
+BATTERY_DIGIT = DigitStyle(width=18, height=BATTERY_H, thickness=BATTERY_T)
+BATTERY_HUNDREDS = DigitStyle(width=BATTERY_T, height=BATTERY_H, thickness=BATTERY_T)  # a lone "1"
+PERCENT_W = 20
 LOW_BATTERY_COLOR = "#FFFF3B30"
 
 
-def battery_parts() -> tuple[Rect, Rect]:
-    b = BATTERY_BODY
-    nub = Rect(b.x + b.w + 2, b.y + 7, 4, b.h - 14, corner=2)
-    inset = BATTERY_STROKE + 2
-    fill = Rect(b.x + inset, b.y + inset, b.w - 2 * inset, b.h - 2 * inset, corner=2)
-    return nub, fill
+@dataclass(frozen=True)
+class BatteryLayout:
+    outline: list[Rect]  # absolute coordinates
+    bars: list[Rect]  # absolute coordinates
+    hundreds_x: int
+    tens_x: int
+    ones_x: int
+    percent_x: int
+
+
+def battery_layout() -> BatteryLayout:
+    t, h, w = BATTERY_T, BATTERY_H, BATTERY_W
+    g = BATTERY_DIGIT.gap
+    nub_gap, nub_w = 2, 4
+    digit_gap = 4
+    widths = [
+        w + nub_gap + nub_w, 12,
+        BATTERY_HUNDREDS.width, digit_gap,
+        BATTERY_DIGIT.width, digit_gap,
+        BATTERY_DIGIT.width, 5,
+        PERCENT_W,
+    ]
+    x = (CANVAS - sum(widths)) // 2
+    y = BATTERY_Y
+    # Same pill geometry as a digit's outer segments, with full-height sides.
+    outline = [
+        Rect(x + t // 2 + g, y, w - t - 2 * g, t),
+        Rect(x + t // 2 + g, y + h - t, w - t - 2 * g, t),
+        Rect(x, y + t // 2 + g, t, h - t - 2 * g),
+        Rect(x + w - t, y + t // 2 + g, t, h - t - 2 * g),
+        Rect(x + w + nub_gap, y + h // 2 - 5, nub_w, 10),
+    ]
+    inner_x, inner_w = x + t + 3, w - 2 * t - 6
+    bar_gap = 2
+    bar_w = (inner_w - bar_gap * (BATTERY_BARS - 1)) // BATTERY_BARS
+    bars = [
+        Rect(inner_x + i * (bar_w + bar_gap), y + t + 3, bar_w, h - 2 * t - 6)
+        for i in range(BATTERY_BARS)
+    ]
+    hundreds_x = x + sum(widths[:2])
+    tens_x = hundreds_x + sum(widths[2:4])
+    ones_x = tens_x + sum(widths[4:6])
+    percent_x = ones_x + sum(widths[6:8])
+    return BatteryLayout(outline, bars, hundreds_x, tens_x, ones_x, percent_x)
+
+
+def percent_shapes() -> tuple[list[Rect], tuple[int, int, int, int]]:
+    """Two round dots plus a slash (start/end point), relative to the % cell."""
+    dots = [Rect(0, 2, 6, 6), Rect(PERCENT_W - 6, BATTERY_H - 8, 6, 6)]
+    return dots, (PERCENT_W - 3, 3, 3, BATTERY_H - 3)
 
 
 def date_positions(x0: int) -> tuple[list[int], Rect]:
@@ -249,15 +300,22 @@ def lit_digit(
     value_expr: str,
     color: str,
     blank_zero: bool = False,
+    zero_guard: str | None = None,
 ) -> None:
-    """One digit position: a Compare per value containing its lit segments."""
+    """One digit position: a Compare per value containing its lit segments.
+
+    blank_zero drops 0 entirely; zero_guard shows 0 only while that expression holds.
+    """
     rects = segment_rects(style)
     values = [v for v in range(10) if not (blank_zero and v == 0)]
     x.open(f'<Group name="{name}" x="{dx}" y="{dy}" width="{style.width}" height="{style.height}">')
     x.open("<Condition>")
     x.open("<Expressions>")
     for v in values:
-        x.line(f'<Expression name="{name}_is{v}"><![CDATA[{value_expr} == {v}]]></Expression>')
+        expr = f"{value_expr} == {v}"
+        if v == 0 and zero_guard:
+            expr = f"{expr} && {zero_guard}"
+        x.line(f'<Expression name="{name}_is{v}"><![CDATA[{expr}]]></Expression>')
     x.close("</Expressions>")
     for v in values:
         x.open(f'<Compare expression="{name}_is{v}">')
@@ -373,48 +431,75 @@ def emit_seconds(x: Xml) -> None:
 
 
 def emit_battery(x: Xml) -> None:
-    b = BATTERY_BODY
-    nub, fill = battery_parts()
-    t = BATTERY_STROKE
+    lay = battery_layout()
+    pct = "[BATTERY_PERCENT]"
+    y, h, t = BATTERY_Y, BATTERY_H, BATTERY_T
+    canvas = Rect(0, 0, CANVAS, CANVAS)
+    hundreds = segment_rects(BATTERY_HUNDREDS)
     full_group(x, "battery")
     ambient_alpha(x, AMBIENT_BATTERY_ALPHA)
 
-    # Stroke is centered on the shape edge, so inset the outline by half its thickness.
-    x.open(f'<PartDraw name="battery_body" x="{b.x}" y="{b.y}" width="{b.w}" height="{b.h}">')
-    x.open(
-        f'<RoundRectangle x="{t / 2:g}" y="{t / 2:g}" width="{b.w - t}" height="{b.h - t}" '
-        f'cornerRadiusX="{b.radius:g}" cornerRadiusY="{b.radius:g}">'
-    )
-    x.line(f'<Stroke color="{DATE_COLOR}" thickness="{t}" />')
-    x.close("</RoundRectangle>")
-    x.close("</PartDraw>")
-    part_draw(x, "battery_nub", nub, [Rect(0, 0, nub.w, nub.h, nub.corner)], DATE_COLOR)
+    x.open('<ListConfiguration id="ghost">')
+    x.open('<ListOption id="on">')
+    full_group(x, "battery_ghost", BATTERY_GHOST_ALPHA)
+    ambient_alpha(x, 0)
+    part_draw(x, "battery_ghost_bars", canvas, lay.bars, DATE_COLOR)
+    part_draw(x, "battery_ghost_hundreds", Rect(lay.hundreds_x, y, t, h), [hundreds["b"], hundreds["c"]], DATE_COLOR)
+    ghost_digit(x, "battery_ghost_tens", lay.tens_x, y, BATTERY_DIGIT, DATE_COLOR)
+    ghost_digit(x, "battery_ghost_ones", lay.ones_x, y, BATTERY_DIGIT, DATE_COLOR)
+    x.close("</Group>")
+    x.close("</ListOption>")
+    x.close("</ListConfiguration>")
 
-    level = f"clamp([BATTERY_PERCENT], 0, 100) / 100 * {fill.w}"
-    fill_shape = Rect(0, 0, fill.w, fill.h, fill.corner)
+    part_draw(x, "battery_outline", canvas, lay.outline, DATE_COLOR)
+
+    # Charge bars: bar i lights above i * 20%; all bars turn red when the battery is low.
+    def bars(suffix: str, color: str) -> None:
+        open_full_group(x, f"battery_bars_{suffix}")
+        for i, bar in enumerate(lay.bars):
+            name = f"battery_bar{i}_{suffix}"
+            x.open("<Condition>")
+            x.open("<Expressions>")
+            x.line(f'<Expression name="{name}_on"><![CDATA[{pct} > {i * 100 // BATTERY_BARS}]]></Expression>')
+            x.close("</Expressions>")
+            x.open(f'<Compare expression="{name}_on">')
+            part_draw(x, name, bar, [Rect(0, 0, bar.w, bar.h)], color)
+            x.close("</Compare>")
+            x.close("</Condition>")
+        x.close("</Group>")
+
     x.open("<Condition>")
     x.open("<Expressions>")
     x.line('<Expression name="battery_low"><![CDATA[[BATTERY_IS_LOW]]]></Expression>')
     x.close("</Expressions>")
-    for open_tag, close_tag, name, color in (
-        ('<Compare expression="battery_low">', "</Compare>", "battery_fill_low", LOW_BATTERY_COLOR),
-        ("<Default>", "</Default>", "battery_fill", DATE_COLOR),
-    ):
-        x.open(open_tag)
-        x.open(f'<PartDraw name="{name}" x="{fill.x}" y="{fill.y}" width="{fill.w}" height="{fill.h}">')
-        round_rect(x, fill_shape, color, width_transform=level)
-        x.close("</PartDraw>")
-        x.close(close_tag)
+    x.open('<Compare expression="battery_low">')
+    bars("low", LOW_BATTERY_COLOR)
+    x.close("</Compare>")
+    x.open("<Default>")
+    bars("normal", DATE_COLOR)
+    x.close("</Default>")
     x.close("</Condition>")
 
-    tx = BATTERY_TEXT
-    x.open(f'<PartText x="{tx.x}" y="{tx.y}" width="{tx.w}" height="{tx.h}">')
-    x.open('<Text align="START">')
-    x.open(f'<Font family="SYNC_TO_DEVICE" size="{BATTERY_TEXT_SIZE}" weight="MEDIUM" color="{DATE_COLOR}">')
-    x.line('<Template>%s%%<Parameter expression="[BATTERY_PERCENT]" /></Template>')
-    x.close("</Font>")
-    x.close("</Text>")
-    x.close("</PartText>")
+    x.open("<Condition>")
+    x.open("<Expressions>")
+    x.line(f'<Expression name="battery_full"><![CDATA[{pct} >= 100]]></Expression>')
+    x.close("</Expressions>")
+    x.open('<Compare expression="battery_full">')
+    part_draw(x, "battery_hundreds", Rect(lay.hundreds_x, y, t, h), [hundreds["b"], hundreds["c"]], DATE_COLOR)
+    x.close("</Compare>")
+    x.close("</Condition>")
+    lit_digit(x, "battery_tens", lay.tens_x, y, BATTERY_DIGIT, f"floor({pct} / 10) % 10", DATE_COLOR,
+              zero_guard=f"{pct} >= 100")
+    lit_digit(x, "battery_ones", lay.ones_x, y, BATTERY_DIGIT, ones(pct), DATE_COLOR)
+
+    dots, (x1, y1, x2, y2) = percent_shapes()
+    x.open(f'<PartDraw name="battery_percent" x="{lay.percent_x}" y="{y}" width="{PERCENT_W}" height="{h}">')
+    for dot in dots:
+        round_rect(x, dot, DATE_COLOR)
+    x.open(f'<Line startX="{x1}" startY="{y1}" endX="{x2}" endY="{y2}">')
+    x.line(f'<Stroke color="{DATE_COLOR}" thickness="{t}" cap="ROUND" />')
+    x.close("</Line>")
+    x.close("</PartDraw>")
     x.close("</Group>")
 
 
@@ -530,6 +615,19 @@ class Canvas:
                 if cov > 0:
                     self._blend(py * self.size + px, rgb, cov * alpha)
 
+    def capsule(self, x1: float, y1: float, x2: float, y2: float, radius: float, rgb, alpha: float = 1.0) -> None:
+        """A line segment with round caps (matches Stroke cap="ROUND")."""
+        dx, dy = x2 - x1, y2 - y1
+        length_sq = dx * dx + dy * dy
+        for py in range(max(0, int(min(y1, y2) - radius) - 1), min(self.size, int(max(y1, y2) + radius) + 2)):
+            for px in range(max(0, int(min(x1, x2) - radius) - 1), min(self.size, int(max(x1, x2) + radius) + 2)):
+                cx, cy = px + 0.5 - x1, py + 0.5 - y1
+                u = max(0.0, min(1.0, (cx * dx + cy * dy) / length_sq))
+                d = math.hypot(cx - u * dx, cy - u * dy) - radius
+                cov = min(1.0, max(0.0, 0.5 - d))
+                if cov > 0:
+                    self._blend(py * self.size + px, rgb, cov * alpha)
+
     def png(self) -> bytes:
         raw = bytearray()
         for y in range(self.size):
@@ -564,7 +662,7 @@ def build_preview() -> bytes:
     cv.circle(CANVAS / 2, CANVAS / 2, CANVAS / 2, (0, 0, 0))
 
     def digit(dx: int, dy: int, style: DigitStyle, value: int, rgb) -> None:
-        ghost = (GHOST_ALPHA if style is TIME_STYLE else SMALL_GHOST_ALPHA) / 255
+        ghost = {TIME_STYLE: GHOST_ALPHA, BATTERY_DIGIT: BATTERY_GHOST_ALPHA}.get(style, SMALL_GHOST_ALPHA) / 255
         for seg, r in segment_rects(style).items():
             shifted = Rect(r.x + dx, r.y + dy, r.w, r.h)
             cv.round_rect(shifted, rgb, 1.0 if seg in DIGIT_SEGMENTS[value] else ghost)
@@ -581,14 +679,23 @@ def build_preview() -> bytes:
     for dx, v in zip(seconds_positions(), (3, 2)):
         digit(dx, ROW2_Y, SMALL_STYLE, v, time_rgb)
 
-    # Battery glyph at 80% (the percentage text can't be rendered here).
-    b = BATTERY_BODY
-    t = BATTERY_STROKE
-    nub, fill = battery_parts()
-    cv.round_rect(b, date_rgb)
-    cv.round_rect(Rect(b.x + t, b.y + t, b.w - 2 * t, b.h - 2 * t, b.radius - t), (0, 0, 0))
-    cv.round_rect(nub, date_rgb)
-    cv.round_rect(Rect(fill.x, fill.y, round(fill.w * 0.8), fill.h, fill.corner), date_rgb)
+    # Battery meter at 80%.
+    lay = battery_layout()
+    battery_ghost = BATTERY_GHOST_ALPHA / 255
+    for r in lay.outline:
+        cv.round_rect(r, date_rgb)
+    for i, r in enumerate(lay.bars):
+        cv.round_rect(r, date_rgb, 1.0 if 80 > i * 100 // BATTERY_BARS else battery_ghost)
+    hundreds = segment_rects(BATTERY_HUNDREDS)
+    for seg in "bc":
+        r = hundreds[seg]
+        cv.round_rect(Rect(r.x + lay.hundreds_x, r.y + BATTERY_Y, r.w, r.h), date_rgb, battery_ghost)
+    digit(lay.tens_x, BATTERY_Y, BATTERY_DIGIT, 8, date_rgb)
+    digit(lay.ones_x, BATTERY_Y, BATTERY_DIGIT, 0, date_rgb)
+    dots, (x1, y1, x2, y2) = percent_shapes()
+    for r in dots:
+        cv.round_rect(Rect(r.x + lay.percent_x, r.y + BATTERY_Y, r.w, r.h), date_rgb)
+    cv.capsule(lay.percent_x + x1, BATTERY_Y + y1, lay.percent_x + x2, BATTERY_Y + y2, BATTERY_T / 2, date_rgb)
     return cv.png()
 
 

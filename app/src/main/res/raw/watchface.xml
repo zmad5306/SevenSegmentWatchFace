@@ -42,13 +42,98 @@
     <Scene backgroundColor="#FF000000">
         <Group name="battery" x="0" y="0" width="450" height="450">
             <Variant mode="AMBIENT" target="alpha" value="140" />
-            <PartDraw name="battery_body" x="172" y="100" width="40" height="22">
-                <RoundRectangle x="1.5" y="1.5" width="37" height="19" cornerRadiusX="6" cornerRadiusY="6">
-                    <Stroke color="[CONFIGURATION.dateColor.0]" thickness="3" />
+            <ListConfiguration id="ghost">
+                <ListOption id="on">
+                    <Group name="battery_ghost" x="0" y="0" width="450" height="450" alpha="120">
+                        <Variant mode="AMBIENT" target="alpha" value="0" />
+                        <PartDraw name="battery_ghost_bars" x="0" y="0" width="450" height="450">
+                            <RoundRectangle x="157" y="99" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="166" y="99" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="175" y="99" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="184" y="99" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="193" y="99" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                        <PartDraw name="battery_ghost_hundreds" x="226" y="92" width="4" height="32">
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                        <PartDraw name="battery_ghost_tens" x="234" y="92" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                        <PartDraw name="battery_ghost_ones" x="256" y="92" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Group>
+                </ListOption>
+            </ListConfiguration>
+            <PartDraw name="battery_outline" x="0" y="0" width="450" height="450">
+                <RoundRectangle x="154" y="92" width="50" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
                 </RoundRectangle>
-            </PartDraw>
-            <PartDraw name="battery_nub" x="214" y="107" width="4" height="8">
-                <RoundRectangle x="0" y="0" width="4" height="8" cornerRadiusX="2" cornerRadiusY="2">
+                <RoundRectangle x="154" y="120" width="50" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
+                </RoundRectangle>
+                <RoundRectangle x="150" y="96" width="4" height="24" cornerRadiusX="2" cornerRadiusY="2">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
+                </RoundRectangle>
+                <RoundRectangle x="204" y="96" width="4" height="24" cornerRadiusX="2" cornerRadiusY="2">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
+                </RoundRectangle>
+                <RoundRectangle x="210" y="103" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
                     <Fill color="[CONFIGURATION.dateColor.0]" />
                 </RoundRectangle>
             </PartDraw>
@@ -57,29 +142,566 @@
                     <Expression name="battery_low"><![CDATA[[BATTERY_IS_LOW]]]></Expression>
                 </Expressions>
                 <Compare expression="battery_low">
-                    <PartDraw name="battery_fill_low" x="177" y="105" width="30" height="12">
-                        <RoundRectangle x="0" y="0" width="30" height="12" cornerRadiusX="2" cornerRadiusY="2">
-                            <Fill color="#FFFF3B30" />
-                            <Transform target="width" value="clamp([BATTERY_PERCENT], 0, 100) / 100 * 30" />
+                    <Group name="battery_bars_low" x="0" y="0" width="450" height="450">
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar0_low_on"><![CDATA[[BATTERY_PERCENT] > 0]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar0_low_on">
+                                <PartDraw name="battery_bar0_low" x="157" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="#FFFF3B30" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar1_low_on"><![CDATA[[BATTERY_PERCENT] > 20]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar1_low_on">
+                                <PartDraw name="battery_bar1_low" x="166" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="#FFFF3B30" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar2_low_on"><![CDATA[[BATTERY_PERCENT] > 40]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar2_low_on">
+                                <PartDraw name="battery_bar2_low" x="175" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="#FFFF3B30" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar3_low_on"><![CDATA[[BATTERY_PERCENT] > 60]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar3_low_on">
+                                <PartDraw name="battery_bar3_low" x="184" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="#FFFF3B30" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar4_low_on"><![CDATA[[BATTERY_PERCENT] > 80]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar4_low_on">
+                                <PartDraw name="battery_bar4_low" x="193" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="#FFFF3B30" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                    </Group>
+                </Compare>
+                <Default>
+                    <Group name="battery_bars_normal" x="0" y="0" width="450" height="450">
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar0_normal_on"><![CDATA[[BATTERY_PERCENT] > 0]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar0_normal_on">
+                                <PartDraw name="battery_bar0_normal" x="157" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="[CONFIGURATION.dateColor.0]" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar1_normal_on"><![CDATA[[BATTERY_PERCENT] > 20]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar1_normal_on">
+                                <PartDraw name="battery_bar1_normal" x="166" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="[CONFIGURATION.dateColor.0]" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar2_normal_on"><![CDATA[[BATTERY_PERCENT] > 40]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar2_normal_on">
+                                <PartDraw name="battery_bar2_normal" x="175" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="[CONFIGURATION.dateColor.0]" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar3_normal_on"><![CDATA[[BATTERY_PERCENT] > 60]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar3_normal_on">
+                                <PartDraw name="battery_bar3_normal" x="184" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="[CONFIGURATION.dateColor.0]" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                        <Condition>
+                            <Expressions>
+                                <Expression name="battery_bar4_normal_on"><![CDATA[[BATTERY_PERCENT] > 80]]></Expression>
+                            </Expressions>
+                            <Compare expression="battery_bar4_normal_on">
+                                <PartDraw name="battery_bar4_normal" x="193" y="99" width="7" height="18">
+                                    <RoundRectangle x="0" y="0" width="7" height="18" cornerRadiusX="3" cornerRadiusY="3">
+                                        <Fill color="[CONFIGURATION.dateColor.0]" />
+                                    </RoundRectangle>
+                                </PartDraw>
+                            </Compare>
+                        </Condition>
+                    </Group>
+                </Default>
+            </Condition>
+            <Condition>
+                <Expressions>
+                    <Expression name="battery_full"><![CDATA[[BATTERY_PERCENT] >= 100]]></Expression>
+                </Expressions>
+                <Compare expression="battery_full">
+                    <PartDraw name="battery_hundreds" x="226" y="92" width="4" height="32">
+                        <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                            <Fill color="[CONFIGURATION.dateColor.0]" />
+                        </RoundRectangle>
+                        <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                            <Fill color="[CONFIGURATION.dateColor.0]" />
                         </RoundRectangle>
                     </PartDraw>
                 </Compare>
-                <Default>
-                    <PartDraw name="battery_fill" x="177" y="105" width="30" height="12">
-                        <RoundRectangle x="0" y="0" width="30" height="12" cornerRadiusX="2" cornerRadiusY="2">
-                            <Fill color="[CONFIGURATION.dateColor.0]" />
-                            <Transform target="width" value="clamp([BATTERY_PERCENT], 0, 100) / 100 * 30" />
-                        </RoundRectangle>
-                    </PartDraw>
-                </Default>
             </Condition>
-            <PartText x="226" y="93" width="90" height="36">
-                <Text align="START">
-                    <Font family="SYNC_TO_DEVICE" size="26" weight="MEDIUM" color="[CONFIGURATION.dateColor.0]">
-                        <Template>%s%%<Parameter expression="[BATTERY_PERCENT]" /></Template>
-                    </Font>
-                </Text>
-            </PartText>
+            <Group name="battery_tens" x="234" y="92" width="18" height="32">
+                <Condition>
+                    <Expressions>
+                        <Expression name="battery_tens_is0"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 0 && [BATTERY_PERCENT] >= 100]]></Expression>
+                        <Expression name="battery_tens_is1"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 1]]></Expression>
+                        <Expression name="battery_tens_is2"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 2]]></Expression>
+                        <Expression name="battery_tens_is3"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 3]]></Expression>
+                        <Expression name="battery_tens_is4"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 4]]></Expression>
+                        <Expression name="battery_tens_is5"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 5]]></Expression>
+                        <Expression name="battery_tens_is6"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 6]]></Expression>
+                        <Expression name="battery_tens_is7"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 7]]></Expression>
+                        <Expression name="battery_tens_is8"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 8]]></Expression>
+                        <Expression name="battery_tens_is9"><![CDATA[floor([BATTERY_PERCENT] / 10) % 10 == 9]]></Expression>
+                    </Expressions>
+                    <Compare expression="battery_tens_is0">
+                        <PartDraw name="battery_tens_0" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is1">
+                        <PartDraw name="battery_tens_1" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is2">
+                        <PartDraw name="battery_tens_2" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is3">
+                        <PartDraw name="battery_tens_3" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is4">
+                        <PartDraw name="battery_tens_4" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is5">
+                        <PartDraw name="battery_tens_5" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is6">
+                        <PartDraw name="battery_tens_6" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is7">
+                        <PartDraw name="battery_tens_7" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is8">
+                        <PartDraw name="battery_tens_8" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_tens_is9">
+                        <PartDraw name="battery_tens_9" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                </Condition>
+            </Group>
+            <Group name="battery_ones" x="256" y="92" width="18" height="32">
+                <Condition>
+                    <Expressions>
+                        <Expression name="battery_ones_is0"><![CDATA[[BATTERY_PERCENT] % 10 == 0]]></Expression>
+                        <Expression name="battery_ones_is1"><![CDATA[[BATTERY_PERCENT] % 10 == 1]]></Expression>
+                        <Expression name="battery_ones_is2"><![CDATA[[BATTERY_PERCENT] % 10 == 2]]></Expression>
+                        <Expression name="battery_ones_is3"><![CDATA[[BATTERY_PERCENT] % 10 == 3]]></Expression>
+                        <Expression name="battery_ones_is4"><![CDATA[[BATTERY_PERCENT] % 10 == 4]]></Expression>
+                        <Expression name="battery_ones_is5"><![CDATA[[BATTERY_PERCENT] % 10 == 5]]></Expression>
+                        <Expression name="battery_ones_is6"><![CDATA[[BATTERY_PERCENT] % 10 == 6]]></Expression>
+                        <Expression name="battery_ones_is7"><![CDATA[[BATTERY_PERCENT] % 10 == 7]]></Expression>
+                        <Expression name="battery_ones_is8"><![CDATA[[BATTERY_PERCENT] % 10 == 8]]></Expression>
+                        <Expression name="battery_ones_is9"><![CDATA[[BATTERY_PERCENT] % 10 == 9]]></Expression>
+                    </Expressions>
+                    <Compare expression="battery_ones_is0">
+                        <PartDraw name="battery_ones_0" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is1">
+                        <PartDraw name="battery_ones_1" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is2">
+                        <PartDraw name="battery_ones_2" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is3">
+                        <PartDraw name="battery_ones_3" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is4">
+                        <PartDraw name="battery_ones_4" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is5">
+                        <PartDraw name="battery_ones_5" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is6">
+                        <PartDraw name="battery_ones_6" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is7">
+                        <PartDraw name="battery_ones_7" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is8">
+                        <PartDraw name="battery_ones_8" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                    <Compare expression="battery_ones_is9">
+                        <PartDraw name="battery_ones_9" x="0" y="0" width="18" height="32">
+                            <RoundRectangle x="4" y="0" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="14" y="18" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="28" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="0" y="4" width="4" height="10" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                            <RoundRectangle x="4" y="14" width="10" height="4" cornerRadiusX="2" cornerRadiusY="2">
+                                <Fill color="[CONFIGURATION.dateColor.0]" />
+                            </RoundRectangle>
+                        </PartDraw>
+                    </Compare>
+                </Condition>
+            </Group>
+            <PartDraw name="battery_percent" x="279" y="92" width="20" height="32">
+                <RoundRectangle x="0" y="2" width="6" height="6" cornerRadiusX="3" cornerRadiusY="3">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
+                </RoundRectangle>
+                <RoundRectangle x="14" y="24" width="6" height="6" cornerRadiusX="3" cornerRadiusY="3">
+                    <Fill color="[CONFIGURATION.dateColor.0]" />
+                </RoundRectangle>
+                <Line startX="17" startY="3" endX="3" endY="29">
+                    <Stroke color="[CONFIGURATION.dateColor.0]" thickness="4" cap="ROUND" />
+                </Line>
+            </PartDraw>
         </Group>
         <ListConfiguration id="ghost">
             <ListOption id="on">

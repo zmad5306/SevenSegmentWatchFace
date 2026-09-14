@@ -7,7 +7,7 @@ A 7-segment LCD-style watch face for Wear OS, built with [Watch Face Format](htt
 ## Features
 - `HH:MM` time drawn from individual pill-shaped segments. Follows the watch's 12/24-hour setting; the leading zero is blank in 12-hour mode.
 - `MM-DD` date and `SS` seconds in smaller segments.
-- Battery level above the time: a horizontal battery glyph that fills with the charge (red when low) and `NN%`.
+- LCD-style battery meter above the time: a battery outlined in segments with five charge bars (red when low), and the level in small 7-segment digits with a segment `%`.
 - Editable in the watch face editor (long-press the watch face → **Customize**):
   - **Time color**: 11 presets.
   - **Date color**: the same presets. It also colors the battery indicator.
