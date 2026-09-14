@@ -15,8 +15,8 @@ android {
 
     defaultConfig {
         applicationId = "dev.zachmaddox.watchface.sevensegment"
-        // Watch Face Format v2 requires Wear OS 5 (API 34) or newer.
-        minSdk = 34
+        // Watch Face Format v4 requires Wear OS 6 (API 36) or newer.
+        minSdk = 36
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"

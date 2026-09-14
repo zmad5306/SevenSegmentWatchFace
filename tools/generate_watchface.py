@@ -65,13 +65,20 @@ TIME_COLOR = "[CONFIGURATION.timeColor.0]"
 DATE_COLOR = "[CONFIGURATION.dateColor.0]"
 
 GHOST_ALPHA = 36  # unlit segments of the large time digits, out of 255
-# The thin date/seconds segments sit next to bright lit ones and vanish at the
+# The thin date segments sit next to bright lit ones and vanish at the
 # same alpha (silver at 36 is only #191919), so they get a stronger level.
 SMALL_GHOST_ALPHA = 72
 # The battery meter's 4px segments need more still to be visible on the watch.
 BATTERY_GHOST_ALPHA = 120
+# Always-on dimming via AMBIENT Variants. On Wear OS 6 (Pixel Watch 5), Variants using the
+# default full-length transition (WFF v2, or v4 without a duration) often left the face stuck
+# on its first always-on frame after the watch woke and dozed again. A short v4 transition
+# (duration is a fraction of the system's ambient transition) keeps minute updates working.
+# Set AMBIENT_DIMMING = False to fall back to an identical look in both modes.
+AMBIENT_DIMMING = True
 AMBIENT_LIT_ALPHA = 170  # lit segments while in always-on mode
 AMBIENT_BATTERY_ALPHA = 140
+AMBIENT_VARIANT_ATTRS = ' duration="0.1"'
 
 
 @dataclass(frozen=True)
@@ -130,7 +137,6 @@ TIME_PAIR_GAP = 14
 TIME_COLON_GAP = 36
 _time_total = TIME_STYLE.width * 4 + TIME_PAIR_GAP * 2 + TIME_COLON_GAP
 TIME_X = (CANVAS - _time_total) // 2
-TIME_RIGHT = TIME_X + _time_total
 HOUR_XS = (TIME_X, TIME_X + TIME_STYLE.width + TIME_PAIR_GAP)
 _minute_x = HOUR_XS[1] + TIME_STYLE.width + TIME_COLON_GAP
 MINUTE_XS = (_minute_x, _minute_x + TIME_STYLE.width + TIME_PAIR_GAP)
@@ -140,12 +146,7 @@ ROW2_Y = 300
 SMALL_PAIR_GAP = 8
 DASH_SLOT = 28
 DATE_WIDTH = SMALL_STYLE.width * 4 + SMALL_PAIR_GAP * 2 + DASH_SLOT
-SECONDS_WIDTH = SMALL_STYLE.width * 2 + SMALL_PAIR_GAP
-# With seconds shown the date is flush with the hours and the seconds flush
-# with the minutes; without seconds the date is centered.
-DATE_X_WITH_SECONDS = TIME_X
-DATE_X_CENTERED = (CANVAS - DATE_WIDTH) // 2
-SECONDS_X = TIME_RIGHT - SECONDS_WIDTH
+DATE_X = (CANVAS - DATE_WIDTH) // 2
 
 # LCD-style battery meter above the time: a battery outlined in segment pills
 # with five charge bars, then the level in small 7-segment digits and a "%".
@@ -222,10 +223,6 @@ def date_positions(x0: int) -> tuple[list[int], Rect]:
     dash_w = DASH_SLOT - 2 * s.gap
     dash = Rect(dash_x + s.gap, ROW2_Y + s.height // 2 - s.thickness // 2, dash_w, s.thickness)
     return [d1, d2, d3, d4], dash
-
-
-def seconds_positions() -> list[int]:
-    return [SECONDS_X, SECONDS_X + SMALL_STYLE.width + SMALL_PAIR_GAP]
 
 
 # ---------------------------------------------------------------------------
@@ -326,13 +323,14 @@ def lit_digit(
     x.close("</Group>")
 
 
+def ambient_alpha(x: Xml, value: int) -> None:
+    if AMBIENT_DIMMING:
+        x.line(f'<Variant mode="AMBIENT" target="alpha" value="{value}"{AMBIENT_VARIANT_ATTRS} />')
+
+
 def full_group(x: Xml, name: str, alpha: int | None = None) -> None:
     alpha_attr = f' alpha="{alpha}"' if alpha is not None else ""
     x.open(f'<Group name="{name}" x="0" y="0" width="{CANVAS}" height="{CANVAS}"{alpha_attr}>')
-
-
-def ambient_alpha(x: Xml, value: int) -> None:
-    x.line(f'<Variant mode="AMBIENT" target="alpha" value="{value}" />')
 
 
 def emit_time(x: Xml) -> None:
@@ -382,9 +380,9 @@ def colon_rects() -> list[Rect]:
     return [Rect(COLON_CX - t // 2, y - t // 2, t, t) for y in ys]
 
 
-def emit_date(x: Xml, x0: int, suffix: str) -> None:
+def emit_date(x: Xml) -> None:
     s = SMALL_STYLE
-    xs, dash = date_positions(x0)
+    xs, dash = date_positions(DATE_X)
     sources = [
         tens("[MONTH]"),
         ones("[MONTH]"),
@@ -394,39 +392,19 @@ def emit_date(x: Xml, x0: int, suffix: str) -> None:
 
     x.open('<ListConfiguration id="ghost">')
     x.open('<ListOption id="on">')
-    full_group(x, f"date_ghost_{suffix}", SMALL_GHOST_ALPHA)
+    full_group(x, "date_ghost", SMALL_GHOST_ALPHA)
     ambient_alpha(x, 0)
     for i, dx in enumerate(xs):
-        ghost_digit(x, f"date_ghost_{suffix}_{i}", dx, ROW2_Y, s, DATE_COLOR)
+        ghost_digit(x, f"date_ghost_{i}", dx, ROW2_Y, s, DATE_COLOR)
     x.close("</Group>")
     x.close("</ListOption>")
     x.close("</ListConfiguration>")
 
-    full_group(x, f"date_lit_{suffix}")
+    full_group(x, "date_lit")
     ambient_alpha(x, AMBIENT_LIT_ALPHA)
     for i, (dx, expr) in enumerate(zip(xs, sources)):
-        lit_digit(x, f"date_{suffix}_{i}", dx, ROW2_Y, s, expr, DATE_COLOR)
-    part_draw(x, f"date_dash_{suffix}", Rect(0, 0, CANVAS, CANVAS), [dash], DATE_COLOR)
-    x.close("</Group>")
-
-
-def emit_seconds(x: Xml) -> None:
-    s = SMALL_STYLE
-    xs = seconds_positions()
-    full_group(x, "seconds")
-    ambient_alpha(x, 0)
-
-    x.open('<ListConfiguration id="ghost">')
-    x.open('<ListOption id="on">')
-    full_group(x, "seconds_ghost", SMALL_GHOST_ALPHA)
-    for i, dx in enumerate(xs):
-        ghost_digit(x, f"seconds_ghost_{i}", dx, ROW2_Y, s, TIME_COLOR)
-    x.close("</Group>")
-    x.close("</ListOption>")
-    x.close("</ListConfiguration>")
-
-    lit_digit(x, "second_tens", xs[0], ROW2_Y, s, tens("[SECOND]"), TIME_COLOR)
-    lit_digit(x, "second_ones", xs[1], ROW2_Y, s, ones("[SECOND]"), TIME_COLOR)
+        lit_digit(x, f"date_{i}", dx, ROW2_Y, s, expr, DATE_COLOR)
+    part_draw(x, "date_dash", Rect(0, 0, CANVAS, CANVAS), [dash], DATE_COLOR)
     x.close("</Group>")
 
 
@@ -509,7 +487,7 @@ def build_xml() -> str:
     x.line("<!-- GENERATED by tools/generate_watchface.py - do not edit by hand. -->")
     x.open(f'<WatchFace width="{CANVAS}" height="{CANVAS}">')
     x.line('<Metadata key="CLOCK_TYPE" value="DIGITAL" />')
-    x.line('<Metadata key="PREVIEW_TIME" value="10:08:32" />')
+    x.line('<Metadata key="PREVIEW_TIME" value="10:08:00" />')
 
     # Every configuration gets an icon: without one the runtime logs
     # "Failed to read from inputStream ... Path is empty or null" on each load.
@@ -525,34 +503,21 @@ def build_xml() -> str:
         for opt_id, _, color in PALETTE:
             x.line(f'<ColorOption id="{opt_id}" displayName="color_{opt_id}" colors="{color}" />')
         x.close("</ColorConfiguration>")
-    # On/Off lists rather than BooleanConfigurations: the Wear OS 6 editor clips the
+    # An On/Off list rather than a BooleanConfiguration: the Wear OS 6 editor clips the
     # right edge of BooleanConfiguration switches regardless of label length or icon.
-    for cfg_id, label in (("showSeconds", "config_show_seconds"), ("ghost", "config_ghost")):
-        x.open(
-            f'<ListConfiguration id="{cfg_id}" displayName="{label}" '
-            f'icon="{CONFIG_ICONS[cfg_id]}" defaultValue="on">'
-        )
-        x.line('<ListOption id="on" displayName="option_on" />')
-        x.line('<ListOption id="off" displayName="option_off" />')
-        x.close("</ListConfiguration>")
+    x.open(
+        '<ListConfiguration id="ghost" displayName="config_ghost" '
+        f'icon="{CONFIG_ICONS["ghost"]}" defaultValue="on">'
+    )
+    x.line('<ListOption id="on" displayName="option_on" />')
+    x.line('<ListOption id="off" displayName="option_off" />')
+    x.close("</ListConfiguration>")
     x.close("</UserConfigurations>")
 
     x.open('<Scene backgroundColor="#FF000000">')
     emit_battery(x)
     emit_time(x)
-    x.open('<ListConfiguration id="showSeconds">')
-    x.open('<ListOption id="on">')
-    open_full_group(x, "row2_with_seconds")
-    emit_date(x, DATE_X_WITH_SECONDS, "left")
-    emit_seconds(x)
-    x.close("</Group>")
-    x.close("</ListOption>")
-    x.open('<ListOption id="off">')
-    open_full_group(x, "row2_date_only")
-    emit_date(x, DATE_X_CENTERED, "center")
-    x.close("</Group>")
-    x.close("</ListOption>")
-    x.close("</ListConfiguration>")
+    emit_date(x)
     x.close("</Scene>")
     x.close("</WatchFace>")
     return x.text()
@@ -563,7 +528,6 @@ def build_strings() -> str:
         ("app_name", "Seven Segment"),
         ("config_time_color", "Time color"),
         ("config_date_color", "Date color"),
-        ("config_show_seconds", "Show seconds"),
         ("config_ghost", "Unlit segments"),
         ("option_on", "On"),
         ("option_off", "Off"),
@@ -672,12 +636,10 @@ def build_preview() -> bytes:
     for r in colon_rects():
         cv.round_rect(r, time_rgb)
 
-    xs, dash = date_positions(DATE_X_WITH_SECONDS)
+    xs, dash = date_positions(DATE_X)
     for dx, v in zip(xs, (0, 9, 1, 4)):
         digit(dx, ROW2_Y, SMALL_STYLE, v, date_rgb)
     cv.round_rect(dash, date_rgb)
-    for dx, v in zip(seconds_positions(), (3, 2)):
-        digit(dx, ROW2_Y, SMALL_STYLE, v, time_rgb)
 
     # Battery meter at 80%.
     lay = battery_layout()
@@ -707,7 +669,6 @@ CONFIG_ICON_SIZE = 96  # the runtime resizes anything over 360x360
 CONFIG_ICONS = {
     "timeColor": "cfg_time_color",
     "dateColor": "cfg_date_color",
-    "showSeconds": "cfg_show_seconds",
     "ghost": "cfg_ghost",
 }
 
@@ -729,7 +690,7 @@ def build_config_icon(cfg_id: str) -> bytes:
             digit(x0, y0, style, 8)
         else:
             digit(x0, y0, style, 7, unlit_alpha=0.3)
-    elif cfg_id == "dateColor":
+    else:  # dateColor
         style, gap, dash_slot = DigitStyle(width=16, height=30, thickness=4), 4, 12
         total = style.width * 4 + gap * 2 + dash_slot
         x, y0 = (CONFIG_ICON_SIZE - total) // 2, (CONFIG_ICON_SIZE - style.height) // 2
@@ -738,12 +699,6 @@ def build_config_icon(cfg_id: str) -> bytes:
             x += style.width + (dash_slot if i == 1 else gap)
         dash_x = (CONFIG_ICON_SIZE - dash_slot) // 2 + style.gap
         cv.round_rect(Rect(dash_x, y0 + style.height // 2 - 2, dash_slot - 2 * style.gap, 4), white)
-    else:  # showSeconds
-        style, gap = DigitStyle(width=26, height=48, thickness=6), 8
-        x0 = (CONFIG_ICON_SIZE - style.width * 2 - gap) // 2
-        y0 = (CONFIG_ICON_SIZE - style.height) // 2
-        digit(x0, y0, style, 3)
-        digit(x0 + style.width + gap, y0, style, 2)
     return cv.png()
 
 

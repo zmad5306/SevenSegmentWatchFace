@@ -14,7 +14,7 @@
 
         <property
             android:name="com.google.wear.watchface.format.version"
-            android:value="2" />
+            android:value="4" />
         <property
             android:name="com.google.wear.watchface.format.publisher"
             android:value="dev.zachmaddox" />

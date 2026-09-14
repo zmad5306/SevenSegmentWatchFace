@@ -6,4 +6,13 @@ local.properties
 !.idea/dictionaries/
 *.iml
 .kotlin/
-release
+
+# Signed bundles/APKs and R8 mapping from Android Studio's "Generate Signed App Bundle".
+/app/release/
+
+# Signing keys never belong in the repo.
+*.jks
+*.keystore
+
+# Python bytecode from running tools/generate_watchface.py.
+__pycache__/

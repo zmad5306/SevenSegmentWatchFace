@@ -4,7 +4,6 @@
     <string name="app_name">Seven Segment</string>
     <string name="config_time_color">Time color</string>
     <string name="config_date_color">Date color</string>
-    <string name="config_show_seconds">Show seconds</string>
     <string name="config_ghost">Unlit segments</string>
     <string name="option_on">On</string>
     <string name="option_off">Off</string>
