@@ -5,4 +5,4 @@
     flagged by lint's UnusedResources check.
 -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@raw/watchface,@xml/watch_face_info,@drawable/preview,@drawable/cfg_*,@string/*" />
+    tools:keep="@raw/watchface,@xml/watch_face_info,@drawable/preview,@drawable/cfg_*,@drawable/seg_time_*,@string/*" />
