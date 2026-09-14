@@ -1,6 +1,8 @@
 .gradle/
 build/
 local.properties
-.idea/
+.idea/*
+# Share the spell-check dictionary so everyone gets the same inspection results.
+!.idea/dictionaries/
 *.iml
 .kotlin/

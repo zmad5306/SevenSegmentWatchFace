@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// Declared here rather than in settings.gradle.kts, where the repositories API is still @Incubating.
+// AGP resolves build tooling (e.g. aapt2) from these.
+repositories {
+    google()
+    mavenCentral()
+}
+
 android {
     namespace = "dev.zachmaddox.watchface.sevensegment"
     compileSdk = 37

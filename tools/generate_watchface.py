@@ -76,7 +76,7 @@ class DigitStyle:
 
     @property
     def gap(self) -> int:
-        # Keeps neighbouring pill ends visibly apart (needs > ~0.21 * thickness).
+        # Keeps neighboring pill ends visibly apart (needs > ~0.21 * thickness).
         return max(2, round(self.thickness * 0.35))
 
 
@@ -135,7 +135,7 @@ DASH_SLOT = 28
 DATE_WIDTH = SMALL_STYLE.width * 4 + SMALL_PAIR_GAP * 2 + DASH_SLOT
 SECONDS_WIDTH = SMALL_STYLE.width * 2 + SMALL_PAIR_GAP
 # With seconds shown the date is flush with the hours and the seconds flush
-# with the minutes; without seconds the date is centred.
+# with the minutes; without seconds the date is centered.
 DATE_X_WITH_SECONDS = TIME_X
 DATE_X_CENTERED = (CANVAS - DATE_WIDTH) // 2
 SECONDS_X = TIME_RIGHT - SECONDS_WIDTH
@@ -363,7 +363,7 @@ def emit_complication(x: Xml) -> None:
 
     def text(y: int, h: int) -> None:
         x.open(f'<PartText x="0" y="{y}" width="{c.w}" height="{h}">')
-        x.open('<Text align="CENTER" ellipsis="TRUE">')
+        x.open('<Text ellipsis="TRUE">')  # align defaults to CENTER
         x.open(f'<Font family="SYNC_TO_DEVICE" size="26" weight="MEDIUM" color="{DATE_COLOR}">')
         x.line('<Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>')
         x.close("</Font>")

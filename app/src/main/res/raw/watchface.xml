@@ -43,7 +43,7 @@
                     <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
                 </PartImage>
                 <PartText x="0" y="32" width="110" height="34">
-                    <Text align="CENTER" ellipsis="TRUE">
+                    <Text ellipsis="TRUE">
                         <Font family="SYNC_TO_DEVICE" size="26" weight="MEDIUM" color="[CONFIGURATION.dateColor.0]">
                             <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>
@@ -52,7 +52,7 @@
             </Complication>
             <Complication type="RANGED_VALUE">
                 <PartText x="0" y="0" width="110" height="36">
-                    <Text align="CENTER" ellipsis="TRUE">
+                    <Text ellipsis="TRUE">
                         <Font family="SYNC_TO_DEVICE" size="26" weight="MEDIUM" color="[CONFIGURATION.dateColor.0]">
                             <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
                         </Font>

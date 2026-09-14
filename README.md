@@ -18,11 +18,13 @@ A 7-segment LCD-style watch face for Wear OS, built with [Watch Face Format](htt
 ## Layout
 `tools/generate_watchface.py` is the source of truth. It writes these files:
 
-| File | Contents |
-|---|---|
-| `app/src/main/res/raw/watchface.xml` | the WFF scene |
-| `app/src/main/res/values/strings.xml` | editor labels |
-| `app/src/main/res/drawable-nodpi/preview.png` | watch face picker preview |
+| File                                                   | Contents                  |
+|--------------------------------------------------------|---------------------------|
+| `app/src/main/res/raw/watchface.xml`                   | the WFF scene             |
+| `app/src/main/res/values/strings.xml`                  | editor labels             |
+| `app/src/main/res/drawable-nodpi/preview.png`          | watch face picker preview |
+| `app/src/main/res/drawable/ic_launcher_foreground.xml` | app icon artwork          |
+| `app/src/main/res/mipmap-anydpi/ic_launcher.xml`       | adaptive app icon         |
 
 Don't edit those files by hand. Change the geometry, palette, or options in the script, then regenerate:
 
