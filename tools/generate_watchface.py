@@ -64,7 +64,10 @@ DEFAULT_DATE_COLOR = "silver"
 TIME_COLOR = "[CONFIGURATION.timeColor.0]"
 DATE_COLOR = "[CONFIGURATION.dateColor.0]"
 
-GHOST_ALPHA = 36  # unlit segments, out of 255
+GHOST_ALPHA = 36  # unlit segments of the large time digits, out of 255
+# The thin date/seconds segments sit next to bright lit ones and vanish at the
+# same alpha (silver at 36 is only #191919), so they get a stronger level.
+SMALL_GHOST_ALPHA = 72
 AMBIENT_LIT_ALPHA = 170  # lit segments while in always-on mode
 AMBIENT_BATTERY_ALPHA = 140
 
@@ -333,7 +336,7 @@ def emit_date(x: Xml, x0: int, suffix: str) -> None:
 
     x.open('<BooleanConfiguration id="ghost">')
     x.open('<BooleanOption id="TRUE">')
-    full_group(x, f"date_ghost_{suffix}", GHOST_ALPHA)
+    full_group(x, f"date_ghost_{suffix}", SMALL_GHOST_ALPHA)
     ambient_alpha(x, 0)
     for i, dx in enumerate(xs):
         ghost_digit(x, f"date_ghost_{suffix}_{i}", dx, ROW2_Y, s, DATE_COLOR)
@@ -357,7 +360,7 @@ def emit_seconds(x: Xml) -> None:
 
     x.open('<BooleanConfiguration id="ghost">')
     x.open('<BooleanOption id="TRUE">')
-    full_group(x, "seconds_ghost", GHOST_ALPHA)
+    full_group(x, "seconds_ghost", SMALL_GHOST_ALPHA)
     for i, dx in enumerate(xs):
         ghost_digit(x, f"seconds_ghost_{i}", dx, ROW2_Y, s, TIME_COLOR)
     x.close("</Group>")
@@ -470,8 +473,9 @@ def build_strings() -> str:
         ("app_name", "Seven Segment"),
         ("config_time_color", "Time color"),
         ("config_date_color", "Date color"),
-        ("config_show_seconds", "Show seconds"),
-        ("config_ghost", "Unlit segments"),
+        # Toggle labels must stay short: longer ones push the editor's switch off the row.
+        ("config_show_seconds", "Seconds"),
+        ("config_ghost", "Shadows"),
     ] + [(f"color_{opt_id}", label) for opt_id, label, _ in PALETTE]
     body = "\n".join(f'    <string name="{k}">{v}</string>' for k, v in entries)
     return (
@@ -550,11 +554,11 @@ def hex_rgb(argb: str) -> tuple[float, float, float]:
 def build_preview() -> bytes:
     colors = {opt_id: hex_rgb(c) for opt_id, _, c in PALETTE}
     time_rgb, date_rgb = colors[DEFAULT_TIME_COLOR], colors[DEFAULT_DATE_COLOR]
-    ghost = GHOST_ALPHA / 255
     cv = Canvas(CANVAS)
     cv.circle(CANVAS / 2, CANVAS / 2, CANVAS / 2, (0, 0, 0))
 
     def digit(dx: int, dy: int, style: DigitStyle, value: int, rgb) -> None:
+        ghost = (GHOST_ALPHA if style is TIME_STYLE else SMALL_GHOST_ALPHA) / 255
         for seg, r in segment_rects(style).items():
             shifted = Rect(r.x + dx, r.y + dy, r.w, r.h)
             cv.round_rect(shifted, rgb, 1.0 if seg in DIGIT_SEGMENTS[value] else ghost)

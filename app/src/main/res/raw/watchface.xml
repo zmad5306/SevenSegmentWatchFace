@@ -1398,7 +1398,7 @@
                 <Group name="row2_with_seconds" x="0" y="0" width="450" height="450">
                     <BooleanConfiguration id="ghost">
                         <BooleanOption id="TRUE">
-                            <Group name="date_ghost_left" x="0" y="0" width="450" height="450" alpha="36">
+                            <Group name="date_ghost_left" x="0" y="0" width="450" height="450" alpha="72">
                                 <Variant mode="AMBIENT" target="alpha" value="0" />
                                 <PartDraw name="date_ghost_left_0" x="61" y="300" width="32" height="56">
                                     <RoundRectangle x="7" y="0" width="18" height="8" cornerRadiusX="4" cornerRadiusY="4">
@@ -2319,7 +2319,7 @@
                         <Variant mode="AMBIENT" target="alpha" value="0" />
                         <BooleanConfiguration id="ghost">
                             <BooleanOption id="TRUE">
-                                <Group name="seconds_ghost" x="0" y="0" width="450" height="450" alpha="36">
+                                <Group name="seconds_ghost" x="0" y="0" width="450" height="450" alpha="72">
                                     <PartDraw name="seconds_ghost_0" x="317" y="300" width="32" height="56">
                                         <RoundRectangle x="7" y="0" width="18" height="8" cornerRadiusX="4" cornerRadiusY="4">
                                             <Fill color="[CONFIGURATION.timeColor.0]" />
@@ -2782,7 +2782,7 @@
                 <Group name="row2_date_only" x="0" y="0" width="450" height="450">
                     <BooleanConfiguration id="ghost">
                         <BooleanOption id="TRUE">
-                            <Group name="date_ghost_center" x="0" y="0" width="450" height="450" alpha="36">
+                            <Group name="date_ghost_center" x="0" y="0" width="450" height="450" alpha="72">
                                 <Variant mode="AMBIENT" target="alpha" value="0" />
                                 <PartDraw name="date_ghost_center_0" x="139" y="300" width="32" height="56">
                                     <RoundRectangle x="7" y="0" width="18" height="8" cornerRadiusX="4" cornerRadiusY="4">
