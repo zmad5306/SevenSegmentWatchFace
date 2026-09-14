@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Nothing references these resources from code: the Wear OS watch face runtime
+    loads them by name. Keep them from being stripped by resource shrinking and
+    flagged by lint's UnusedResources check.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/watchface,@xml/watch_face_info,@drawable/preview,@string/*" />
