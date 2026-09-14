@@ -5,6 +5,7 @@ Outputs (relative to the repo root):
   app/src/main/res/raw/watchface.xml        - the WFF scene
   app/src/main/res/values/strings.xml       - labels used by the editor
   app/src/main/res/drawable-nodpi/preview.png - picker preview
+  app/src/main/res/drawable-nodpi/cfg_*.png   - editor icons for each setting
   app/src/main/res/drawable/ic_launcher_foreground.xml, mipmap-anydpi/ic_launcher.xml - app icon
 
 Every lit segment is a pill-shaped RoundRectangle. Each digit position is a
@@ -65,7 +66,7 @@ DATE_COLOR = "[CONFIGURATION.dateColor.0]"
 
 GHOST_ALPHA = 36  # unlit segments, out of 255
 AMBIENT_LIT_ALPHA = 170  # lit segments while in always-on mode
-AMBIENT_COMPLICATION_ALPHA = 140
+AMBIENT_BATTERY_ALPHA = 140
 
 
 @dataclass(frozen=True)
@@ -86,10 +87,11 @@ class Rect:
     y: int
     w: int
     h: int
+    corner: float | None = None  # None = fully rounded (pill)
 
     @property
     def radius(self) -> float:
-        return min(self.w, self.h) / 2
+        return self.corner if self.corner is not None else min(self.w, self.h) / 2
 
 
 def segment_rects(style: DigitStyle) -> dict[str, Rect]:
@@ -140,7 +142,20 @@ DATE_X_WITH_SECONDS = TIME_X
 DATE_X_CENTERED = (CANVAS - DATE_WIDTH) // 2
 SECONDS_X = TIME_RIGHT - SECONDS_WIDTH
 
-COMPLICATION = Rect(170, 62, 110, 66)
+# Horizontal battery glyph + "NN%" above the time, drawn from [BATTERY_PERCENT].
+BATTERY_BODY = Rect(172, 100, 40, 22, corner=6)
+BATTERY_STROKE = 3
+BATTERY_TEXT = Rect(BATTERY_BODY.x + BATTERY_BODY.w + 14, 93, 90, 36)
+BATTERY_TEXT_SIZE = 26
+LOW_BATTERY_COLOR = "#FFFF3B30"
+
+
+def battery_parts() -> tuple[Rect, Rect]:
+    b = BATTERY_BODY
+    nub = Rect(b.x + b.w + 2, b.y + 7, 4, b.h - 14, corner=2)
+    inset = BATTERY_STROKE + 2
+    fill = Rect(b.x + inset, b.y + inset, b.w - 2 * inset, b.h - 2 * inset, corner=2)
+    return nub, fill
 
 
 def date_positions(x0: int) -> tuple[list[int], Rect]:
@@ -354,72 +369,50 @@ def emit_seconds(x: Xml) -> None:
     x.close("</Group>")
 
 
-def emit_complication(x: Xml) -> None:
-    c = COMPLICATION
-    icon = 28
-    icon_x = (c.w - icon) // 2
-    text_y = icon + 4
-    text_h = c.h - text_y
+def emit_battery(x: Xml) -> None:
+    b = BATTERY_BODY
+    nub, fill = battery_parts()
+    t = BATTERY_STROKE
+    full_group(x, "battery")
+    ambient_alpha(x, AMBIENT_BATTERY_ALPHA)
 
-    def text(y: int, h: int) -> None:
-        x.open(f'<PartText x="0" y="{y}" width="{c.w}" height="{h}">')
-        x.open('<Text ellipsis="TRUE">')  # align defaults to CENTER
-        x.open(f'<Font family="SYNC_TO_DEVICE" size="26" weight="MEDIUM" color="{DATE_COLOR}">')
-        x.line('<Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>')
-        x.close("</Font>")
-        x.close("</Text>")
-        x.close("</PartText>")
-
-    def image(resource: str, x_: int, y: int, size: int, tint: bool) -> None:
-        tint_attr = f' tintColor="{DATE_COLOR}"' if tint else ""
-        x.open(f'<PartImage x="{x_}" y="{y}" width="{size}" height="{size}"{tint_attr}>')
-        x.line(f'<Image resource="{resource}" />')
-        x.close("</PartImage>")
-
+    # Stroke is centered on the shape edge, so inset the outline by half its thickness.
+    x.open(f'<PartDraw name="battery_body" x="{b.x}" y="{b.y}" width="{b.w}" height="{b.h}">')
     x.open(
-        f'<ComplicationSlot slotId="0" x="{c.x}" y="{c.y}" width="{c.w}" height="{c.h}" '
-        'supportedTypes="SHORT_TEXT RANGED_VALUE MONOCHROMATIC_IMAGE SMALL_IMAGE" '
-        'isCustomizable="TRUE">'
+        f'<RoundRectangle x="{t / 2:g}" y="{t / 2:g}" width="{b.w - t}" height="{b.h - t}" '
+        f'cornerRadiusX="{b.radius:g}" cornerRadiusY="{b.radius:g}">'
     )
-    x.line(
-        '<DefaultProviderPolicy defaultSystemProvider="WATCH_BATTERY" '
-        'defaultSystemProviderType="SHORT_TEXT" />'
-    )
-    x.line(f'<BoundingBox x="0" y="0" width="{c.w}" height="{c.h}" />')
-    ambient_alpha(x, AMBIENT_COMPLICATION_ALPHA)
-
-    x.open('<Complication type="SHORT_TEXT">')
-    image("[COMPLICATION.MONOCHROMATIC_IMAGE]", icon_x, 0, icon, tint=True)
-    text(text_y, text_h)
-    x.close("</Complication>")
-
-    x.open('<Complication type="RANGED_VALUE">')
-    text(0, 36)
-    # Progress bar: a dim track with a fill whose width follows the value.
-    bar = Rect(10, 46, c.w - 20, 6)
-    progress = (
-        "clamp(([COMPLICATION.RANGED_VALUE_VALUE] - [COMPLICATION.RANGED_VALUE_MIN]) / "
-        "([COMPLICATION.RANGED_VALUE_MAX] - [COMPLICATION.RANGED_VALUE_MIN]), 0, 1)"
-        f" * {bar.w}"
-    )
-    track = Rect(0, 0, bar.w, bar.h)
-    x.open(f'<PartDraw name="range_track" x="{bar.x}" y="{bar.y}" width="{bar.w}" height="{bar.h}" alpha="60">')
-    round_rect(x, track, DATE_COLOR)
+    x.line(f'<Stroke color="{DATE_COLOR}" thickness="{t}" />')
+    x.close("</RoundRectangle>")
     x.close("</PartDraw>")
-    x.open(f'<PartDraw name="range_fill" x="{bar.x}" y="{bar.y}" width="{bar.w}" height="{bar.h}">')
-    round_rect(x, track, DATE_COLOR, width_transform=progress)
-    x.close("</PartDraw>")
-    x.close("</Complication>")
+    part_draw(x, "battery_nub", nub, [Rect(0, 0, nub.w, nub.h, nub.corner)], DATE_COLOR)
 
-    x.open('<Complication type="MONOCHROMATIC_IMAGE">')
-    image("[COMPLICATION.MONOCHROMATIC_IMAGE]", (c.w - 44) // 2, (c.h - 44) // 2, 44, tint=True)
-    x.close("</Complication>")
+    level = f"clamp([BATTERY_PERCENT], 0, 100) / 100 * {fill.w}"
+    fill_shape = Rect(0, 0, fill.w, fill.h, fill.corner)
+    x.open("<Condition>")
+    x.open("<Expressions>")
+    x.line('<Expression name="battery_low"><![CDATA[[BATTERY_IS_LOW]]]></Expression>')
+    x.close("</Expressions>")
+    for open_tag, close_tag, name, color in (
+        ('<Compare expression="battery_low">', "</Compare>", "battery_fill_low", LOW_BATTERY_COLOR),
+        ("<Default>", "</Default>", "battery_fill", DATE_COLOR),
+    ):
+        x.open(open_tag)
+        x.open(f'<PartDraw name="{name}" x="{fill.x}" y="{fill.y}" width="{fill.w}" height="{fill.h}">')
+        round_rect(x, fill_shape, color, width_transform=level)
+        x.close("</PartDraw>")
+        x.close(close_tag)
+    x.close("</Condition>")
 
-    x.open('<Complication type="SMALL_IMAGE">')
-    image("[COMPLICATION.SMALL_IMAGE]", (c.w - 48) // 2, (c.h - 48) // 2, 48, tint=False)
-    x.close("</Complication>")
-
-    x.close("</ComplicationSlot>")
+    tx = BATTERY_TEXT
+    x.open(f'<PartText x="{tx.x}" y="{tx.y}" width="{tx.w}" height="{tx.h}">')
+    x.open('<Text align="START">')
+    x.open(f'<Font family="SYNC_TO_DEVICE" size="{BATTERY_TEXT_SIZE}" weight="MEDIUM" color="{DATE_COLOR}">')
+    x.line('<Template>%s%%<Parameter expression="[BATTERY_PERCENT]" /></Template>')
+    x.close("</Font>")
+    x.close("</Text>")
+    x.close("</PartText>")
+    x.close("</Group>")
 
 
 def build_xml() -> str:
@@ -430,21 +423,29 @@ def build_xml() -> str:
     x.line('<Metadata key="CLOCK_TYPE" value="DIGITAL" />')
     x.line('<Metadata key="PREVIEW_TIME" value="10:08:32" />')
 
+    # Every configuration gets an icon: without one the runtime logs
+    # "Failed to read from inputStream ... Path is empty or null" on each load.
     x.open("<UserConfigurations>")
     for cfg_id, label, default in (
         ("timeColor", "config_time_color", DEFAULT_TIME_COLOR),
         ("dateColor", "config_date_color", DEFAULT_DATE_COLOR),
     ):
-        x.open(f'<ColorConfiguration id="{cfg_id}" displayName="{label}" defaultValue="{default}">')
+        x.open(
+            f'<ColorConfiguration id="{cfg_id}" displayName="{label}" '
+            f'icon="{CONFIG_ICONS[cfg_id]}" defaultValue="{default}">'
+        )
         for opt_id, _, color in PALETTE:
             x.line(f'<ColorOption id="{opt_id}" displayName="color_{opt_id}" colors="{color}" />')
         x.close("</ColorConfiguration>")
-    x.line('<BooleanConfiguration id="showSeconds" displayName="config_show_seconds" defaultValue="TRUE" />')
-    x.line('<BooleanConfiguration id="ghost" displayName="config_ghost" defaultValue="TRUE" />')
+    for cfg_id, label in (("showSeconds", "config_show_seconds"), ("ghost", "config_ghost")):
+        x.line(
+            f'<BooleanConfiguration id="{cfg_id}" displayName="{label}" '
+            f'icon="{CONFIG_ICONS[cfg_id]}" defaultValue="TRUE" />'
+        )
     x.close("</UserConfigurations>")
 
     x.open('<Scene backgroundColor="#FF000000">')
-    emit_complication(x)
+    emit_battery(x)
     emit_time(x)
     x.open('<BooleanConfiguration id="showSeconds">')
     x.open('<BooleanOption id="TRUE">')
@@ -570,13 +571,62 @@ def build_preview() -> bytes:
     for dx, v in zip(seconds_positions(), (3, 2)):
         digit(dx, ROW2_Y, SMALL_STYLE, v, time_rgb)
 
-    # Stand-in for the battery complication: a small battery glyph.
-    c = COMPLICATION
-    bx, by, bw, bh = c.x + c.w // 2 - 22, c.y + 20, 40, 22
-    cv.round_rect(Rect(bx, by, bw, bh), date_rgb)
-    cv.round_rect(Rect(bx + 3, by + 3, bw - 6, bh - 6), (0, 0, 0))
-    cv.round_rect(Rect(bx + 6, by + 6, round((bw - 12) * 0.8), bh - 12), date_rgb)
-    cv.round_rect(Rect(bx + bw + 1, by + 7, 4, bh - 14), date_rgb)
+    # Battery glyph at 80% (the percentage text can't be rendered here).
+    b = BATTERY_BODY
+    t = BATTERY_STROKE
+    nub, fill = battery_parts()
+    cv.round_rect(b, date_rgb)
+    cv.round_rect(Rect(b.x + t, b.y + t, b.w - 2 * t, b.h - 2 * t, b.radius - t), (0, 0, 0))
+    cv.round_rect(nub, date_rgb)
+    cv.round_rect(Rect(fill.x, fill.y, round(fill.w * 0.8), fill.h, fill.corner), date_rgb)
+    return cv.png()
+
+
+# ---------------------------------------------------------------------------
+# Editor icons for the user configurations
+# ---------------------------------------------------------------------------
+
+CONFIG_ICON_SIZE = 96  # the runtime resizes anything over 360x360
+CONFIG_ICONS = {
+    "timeColor": "cfg_time_color",
+    "dateColor": "cfg_date_color",
+    "showSeconds": "cfg_show_seconds",
+    "ghost": "cfg_ghost",
+}
+
+
+def build_config_icon(cfg_id: str) -> bytes:
+    white = (1.0, 1.0, 1.0)
+    cv = Canvas(CONFIG_ICON_SIZE)
+
+    def digit(dx: int, dy: int, style: DigitStyle, value: int, unlit_alpha: float = 0.0) -> None:
+        for seg, r in segment_rects(style).items():
+            alpha = 1.0 if seg in DIGIT_SEGMENTS[value] else unlit_alpha
+            if alpha:
+                cv.round_rect(Rect(r.x + dx, r.y + dy, r.w, r.h), white, alpha)
+
+    if cfg_id in ("timeColor", "ghost"):
+        style = DigitStyle(width=40, height=72, thickness=9)
+        x0, y0 = (CONFIG_ICON_SIZE - style.width) // 2, (CONFIG_ICON_SIZE - style.height) // 2
+        if cfg_id == "timeColor":
+            digit(x0, y0, style, 8)
+        else:
+            digit(x0, y0, style, 7, unlit_alpha=0.3)
+    elif cfg_id == "dateColor":
+        style, gap, dash_slot = DigitStyle(width=16, height=30, thickness=4), 4, 12
+        total = style.width * 4 + gap * 2 + dash_slot
+        x, y0 = (CONFIG_ICON_SIZE - total) // 2, (CONFIG_ICON_SIZE - style.height) // 2
+        for i in range(4):
+            digit(x, y0, style, 8)
+            x += style.width + (dash_slot if i == 1 else gap)
+        dash_x = (CONFIG_ICON_SIZE - dash_slot) // 2 + style.gap
+        cv.round_rect(Rect(dash_x, y0 + style.height // 2 - 2, dash_slot - 2 * style.gap, 4), white)
+    else:  # showSeconds
+        style, gap = DigitStyle(width=26, height=48, thickness=6), 8
+        x0 = (CONFIG_ICON_SIZE - style.width * 2 - gap) // 2
+        y0 = (CONFIG_ICON_SIZE - style.height) // 2
+        digit(x0, y0, style, 3)
+        digit(x0 + style.width + gap, y0, style, 2)
     return cv.png()
 
 
@@ -646,6 +696,8 @@ def main() -> None:
     write(RES / "raw" / "watchface.xml", build_xml())
     write(RES / "values" / "strings.xml", build_strings())
     write(RES / "drawable-nodpi" / "preview.png", build_preview())
+    for cfg_id, name in CONFIG_ICONS.items():
+        write(RES / "drawable-nodpi" / f"{name}.png", build_config_icon(cfg_id))
     write(RES / "drawable" / "ic_launcher_foreground.xml", build_icon_foreground())
     write(RES / "mipmap-anydpi" / "ic_launcher.xml", ICON_ADAPTIVE)
 

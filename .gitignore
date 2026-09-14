@@ -6,3 +6,4 @@ local.properties
 !.idea/dictionaries/
 *.iml
 .kotlin/
+release
