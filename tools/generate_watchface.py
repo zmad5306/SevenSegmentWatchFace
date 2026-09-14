@@ -231,7 +231,7 @@ def part_draw(x: Xml, name: str, bounds: Rect, shapes: list[Rect], color: str) -
 
 
 def open_full_group(x: Xml, name: str) -> None:
-    """Wrapper for places (Compare, Default, BooleanOption) that take one child."""
+    """Wrapper for places (Compare, Default, ListOption) that take one child."""
     x.open(f'<Group name="{name}" x="0" y="0" width="{CANVAS}" height="{CANVAS}">')
 
 
@@ -280,15 +280,15 @@ def ambient_alpha(x: Xml, value: int) -> None:
 def emit_time(x: Xml) -> None:
     s = TIME_STYLE
 
-    x.open('<BooleanConfiguration id="ghost">')
-    x.open('<BooleanOption id="TRUE">')
+    x.open('<ListConfiguration id="ghost">')
+    x.open('<ListOption id="on">')
     full_group(x, "time_ghost", GHOST_ALPHA)
     ambient_alpha(x, 0)
     for i, dx in enumerate(HOUR_XS + MINUTE_XS):
         ghost_digit(x, f"time_ghost_{i}", dx, TIME_Y, s, TIME_COLOR)
     x.close("</Group>")
-    x.close("</BooleanOption>")
-    x.close("</BooleanConfiguration>")
+    x.close("</ListOption>")
+    x.close("</ListConfiguration>")
 
     full_group(x, "time_lit")
     ambient_alpha(x, AMBIENT_LIT_ALPHA)
@@ -334,15 +334,15 @@ def emit_date(x: Xml, x0: int, suffix: str) -> None:
         ones("[DAY]"),
     ]
 
-    x.open('<BooleanConfiguration id="ghost">')
-    x.open('<BooleanOption id="TRUE">')
+    x.open('<ListConfiguration id="ghost">')
+    x.open('<ListOption id="on">')
     full_group(x, f"date_ghost_{suffix}", SMALL_GHOST_ALPHA)
     ambient_alpha(x, 0)
     for i, dx in enumerate(xs):
         ghost_digit(x, f"date_ghost_{suffix}_{i}", dx, ROW2_Y, s, DATE_COLOR)
     x.close("</Group>")
-    x.close("</BooleanOption>")
-    x.close("</BooleanConfiguration>")
+    x.close("</ListOption>")
+    x.close("</ListConfiguration>")
 
     full_group(x, f"date_lit_{suffix}")
     ambient_alpha(x, AMBIENT_LIT_ALPHA)
@@ -358,14 +358,14 @@ def emit_seconds(x: Xml) -> None:
     full_group(x, "seconds")
     ambient_alpha(x, 0)
 
-    x.open('<BooleanConfiguration id="ghost">')
-    x.open('<BooleanOption id="TRUE">')
+    x.open('<ListConfiguration id="ghost">')
+    x.open('<ListOption id="on">')
     full_group(x, "seconds_ghost", SMALL_GHOST_ALPHA)
     for i, dx in enumerate(xs):
         ghost_digit(x, f"seconds_ghost_{i}", dx, ROW2_Y, s, TIME_COLOR)
     x.close("</Group>")
-    x.close("</BooleanOption>")
-    x.close("</BooleanConfiguration>")
+    x.close("</ListOption>")
+    x.close("</ListConfiguration>")
 
     lit_digit(x, "second_tens", xs[0], ROW2_Y, s, tens("[SECOND]"), TIME_COLOR)
     lit_digit(x, "second_ones", xs[1], ROW2_Y, s, ones("[SECOND]"), TIME_COLOR)
@@ -440,29 +440,34 @@ def build_xml() -> str:
         for opt_id, _, color in PALETTE:
             x.line(f'<ColorOption id="{opt_id}" displayName="color_{opt_id}" colors="{color}" />')
         x.close("</ColorConfiguration>")
+    # On/Off lists rather than BooleanConfigurations: the Wear OS 6 editor clips the
+    # right edge of BooleanConfiguration switches regardless of label length or icon.
     for cfg_id, label in (("showSeconds", "config_show_seconds"), ("ghost", "config_ghost")):
-        x.line(
-            f'<BooleanConfiguration id="{cfg_id}" displayName="{label}" '
-            f'icon="{CONFIG_ICONS[cfg_id]}" defaultValue="TRUE" />'
+        x.open(
+            f'<ListConfiguration id="{cfg_id}" displayName="{label}" '
+            f'icon="{CONFIG_ICONS[cfg_id]}" defaultValue="on">'
         )
+        x.line('<ListOption id="on" displayName="option_on" />')
+        x.line('<ListOption id="off" displayName="option_off" />')
+        x.close("</ListConfiguration>")
     x.close("</UserConfigurations>")
 
     x.open('<Scene backgroundColor="#FF000000">')
     emit_battery(x)
     emit_time(x)
-    x.open('<BooleanConfiguration id="showSeconds">')
-    x.open('<BooleanOption id="TRUE">')
+    x.open('<ListConfiguration id="showSeconds">')
+    x.open('<ListOption id="on">')
     open_full_group(x, "row2_with_seconds")
     emit_date(x, DATE_X_WITH_SECONDS, "left")
     emit_seconds(x)
     x.close("</Group>")
-    x.close("</BooleanOption>")
-    x.open('<BooleanOption id="FALSE">')
+    x.close("</ListOption>")
+    x.open('<ListOption id="off">')
     open_full_group(x, "row2_date_only")
     emit_date(x, DATE_X_CENTERED, "center")
     x.close("</Group>")
-    x.close("</BooleanOption>")
-    x.close("</BooleanConfiguration>")
+    x.close("</ListOption>")
+    x.close("</ListConfiguration>")
     x.close("</Scene>")
     x.close("</WatchFace>")
     return x.text()
@@ -473,9 +478,10 @@ def build_strings() -> str:
         ("app_name", "Seven Segment"),
         ("config_time_color", "Time color"),
         ("config_date_color", "Date color"),
-        # Toggle labels must stay short: longer ones push the editor's switch off the row.
-        ("config_show_seconds", "Seconds"),
-        ("config_ghost", "Shadows"),
+        ("config_show_seconds", "Show seconds"),
+        ("config_ghost", "Unlit segments"),
+        ("option_on", "On"),
+        ("option_off", "Off"),
     ] + [(f"color_{opt_id}", label) for opt_id, label, _ in PALETTE]
     body = "\n".join(f'    <string name="{k}">{v}</string>' for k, v in entries)
     return (

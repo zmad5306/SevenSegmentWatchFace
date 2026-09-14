@@ -11,8 +11,8 @@ A 7-segment LCD-style watch face for Wear OS, built with [Watch Face Format](htt
 - Editable in the watch face editor (long-press the watch face → **Customize**):
   - **Time color**: 11 presets.
   - **Date color**: the same presets. It also colors the battery indicator.
-  - **Seconds**: when off, the date moves to the center.
-  - **Shadows**: the faint unlit "ghost 8" behind the lit segments.
+  - **Show seconds**: when off, the date moves to the center.
+  - **Unlit segments**: the faint "ghost 8" behind the lit segments.
 - In always-on mode, seconds and ghost segments are hidden and the digits are dimmed.
 
 ## Layout
