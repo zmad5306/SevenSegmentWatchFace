@@ -5,12 +5,13 @@ Outputs (relative to the repo root):
   app/src/main/res/raw/watchface.xml        - the WFF scene
   app/src/main/res/values/strings.xml       - labels used by the editor
   app/src/main/res/drawable-nodpi/preview.png - picker preview
+  app/src/main/res/drawable-nodpi/seg_time_*.png - native clock bitmap glyphs
   app/src/main/res/drawable-nodpi/cfg_*.png   - editor icons for each setting
   app/src/main/res/drawable/ic_launcher_foreground.xml, mipmap-anydpi/ic_launcher.xml - app icon
 
-Every lit segment is a pill-shaped RoundRectangle. Each digit position is a
-Condition with one Compare per digit value (0-9) holding that value's lit
-segments, so only lit segments are ever drawn. Standard library only.
+Time uses native DigitalClock text with generated seven-segment bitmap glyphs
+so Wear OS can advance it on the low-power display. Date and battery digits
+use conditional pill-shaped RoundRectangles. Standard library only.
 
 Run from anywhere:  python tools/generate_watchface.py
 """
@@ -70,11 +71,7 @@ GHOST_ALPHA = 36  # unlit segments of the large time digits, out of 255
 SMALL_GHOST_ALPHA = 72
 # The battery meter's 4px segments need more still to be visible on the watch.
 BATTERY_GHOST_ALPHA = 120
-# Always-on dimming via AMBIENT Variants. On Wear OS 6 (Pixel Watch 5), Variants using the
-# default full-length transition (WFF v2, or v4 without a duration) often left the face stuck
-# on its first always-on frame after the watch woke and dozed again. A short v4 transition
-# (duration is a fraction of the system's ambient transition) keeps minute updates working.
-# Set AMBIENT_DIMMING = False to fall back to an identical look in both modes.
+# Ambient alpha is cosmetic; native DigitalClock elements provide time updates.
 AMBIENT_DIMMING = True
 AMBIENT_LIT_ALPHA = 170  # lit segments while in always-on mode
 AMBIENT_BATTERY_ALPHA = 140
@@ -346,32 +343,45 @@ def emit_time(x: Xml) -> None:
     x.close("</ListOption>")
     x.close("</ListConfiguration>")
 
+    # Pixel Watch rejects clock offloading when ancestor alpha is below 255.
+    # Let the system dim the always-on display instead of fading the clock.
     full_group(x, "time_lit")
-    ambient_alpha(x, AMBIENT_LIT_ALPHA)
 
-    x.open("<Condition>")
-    x.open("<Expressions>")
-    x.line('<Expression name="is24"><![CDATA[[IS_24_HOUR_MODE]]]></Expression>')
-    x.close("</Expressions>")
-    x.open('<Compare expression="is24">')
-    open_full_group(x, "hours24")
-    lit_digit(x, "hour24_tens", HOUR_XS[0], TIME_Y, s, tens("[HOUR_0_23]"), TIME_COLOR)
-    lit_digit(x, "hour24_ones", HOUR_XS[1], TIME_Y, s, ones("[HOUR_0_23]"), TIME_COLOR)
-    x.close("</Group>")
-    x.close("</Compare>")
-    x.open("<Default>")
-    open_full_group(x, "hours12")
-    lit_digit(x, "hour12_tens", HOUR_XS[0], TIME_Y, s, tens("[HOUR_1_12]"), TIME_COLOR, blank_zero=True)
-    lit_digit(x, "hour12_ones", HOUR_XS[1], TIME_Y, s, ones("[HOUR_1_12]"), TIME_COLOR)
-    x.close("</Group>")
-    x.close("</Default>")
-    x.close("</Condition>")
-
-    lit_digit(x, "minute_tens", MINUTE_XS[0], TIME_Y, s, tens("[MINUTE]"), TIME_COLOR)
-    lit_digit(x, "minute_ones", MINUTE_XS[1], TIME_Y, s, ones("[MINUTE]"), TIME_COLOR)
+    # Two zero-padded native clock components are accepted by Pixel Watch.
+    time_pair(x, HOUR_XS[0], "hh")
+    time_pair(x, MINUTE_XS[0], "mm")
 
     part_draw(x, "colon", Rect(0, 0, CANVAS, CANVAS), colon_rects(), TIME_COLOR)
     x.close("</Group>")
+
+
+def time_pair(x: Xml, dx: int, fmt: str) -> None:
+    # Each glyph includes half the inter-digit gap on either side.
+    # Use zero-padded native formats: the Pixel Watch offloader rejects "h".
+    width = (TIME_STYLE.width + TIME_PAIR_GAP) * 2
+    x.open(
+        f'<DigitalClock x="{dx - TIME_PAIR_GAP // 2}" y="{TIME_Y}" '
+        f'width="{width}" height="{TIME_STYLE.height}">'
+    )
+    x.open(
+        f'<TimeText x="0" y="0" width="{width}" height="{TIME_STYLE.height}" '
+        f'format="{fmt}" hourFormat="SYNC_TO_DEVICE" align="CENTER">'
+    )
+    x.line(f'<BitmapFont family="segment_time" size="{TIME_STYLE.height}" color="{TIME_COLOR}" />')
+    x.close("</TimeText>")
+    x.close("</DigitalClock>")
+
+
+def emit_time_font(x: Xml) -> None:
+    x.open("<BitmapFonts>")
+    x.open('<BitmapFont name="segment_time">')
+    for value in range(10):
+        x.line(
+            f'<Character name="{value}" resource="seg_time_{value}" '
+            f'width="{TIME_STYLE.width + TIME_PAIR_GAP}" height="{TIME_STYLE.height}" />'
+        )
+    x.close("</BitmapFont>")
+    x.close("</BitmapFonts>")
 
 
 def colon_rects() -> list[Rect]:
@@ -489,6 +499,8 @@ def build_xml() -> str:
     x.line('<Metadata key="CLOCK_TYPE" value="DIGITAL" />')
     x.line('<Metadata key="PREVIEW_TIME" value="10:08:00" />')
 
+    emit_time_font(x)
+
     # Every configuration gets an icon: without one the runtime logs
     # "Failed to read from inputStream ... Path is empty or null" on each load.
     x.open("<UserConfigurations>")
@@ -546,9 +558,10 @@ def build_strings() -> str:
 
 
 class Canvas:
-    def __init__(self, size: int) -> None:
+    def __init__(self, size: int, height: int | None = None) -> None:
         self.size = size
-        self.px = [[0.0, 0.0, 0.0, 0.0] for _ in range(size * size)]  # premultiplied
+        self.height = height if height is not None else size
+        self.px = [[0.0, 0.0, 0.0, 0.0] for _ in range(size * self.height)]  # premultiplied
 
     def _blend(self, i: int, rgb: tuple[float, float, float], a: float) -> None:
         p = self.px[i]
@@ -559,7 +572,7 @@ class Canvas:
         p[3] = a + p[3] * inv
 
     def circle(self, cx: float, cy: float, radius: float, rgb, alpha: float = 1.0) -> None:
-        for py in range(max(0, int(cy - radius) - 1), min(self.size, int(cy + radius) + 2)):
+        for py in range(max(0, int(cy - radius) - 1), min(self.height, int(cy + radius) + 2)):
             for px in range(max(0, int(cx - radius) - 1), min(self.size, int(cx + radius) + 2)):
                 d = math.hypot(px + 0.5 - cx, py + 0.5 - cy) - radius
                 cov = min(1.0, max(0.0, 0.5 - d))
@@ -570,7 +583,7 @@ class Canvas:
         rad = r.radius
         cx, cy = r.x + r.w / 2, r.y + r.h / 2
         hx, hy = r.w / 2 - rad, r.h / 2 - rad
-        for py in range(max(0, r.y - 1), min(self.size, r.y + r.h + 1)):
+        for py in range(max(0, r.y - 1), min(self.height, r.y + r.h + 1)):
             for px in range(max(0, r.x - 1), min(self.size, r.x + r.w + 1)):
                 qx = abs(px + 0.5 - cx) - hx
                 qy = abs(py + 0.5 - cy) - hy
@@ -583,7 +596,7 @@ class Canvas:
         """A line segment with round caps (matches Stroke cap="ROUND")."""
         dx, dy = x2 - x1, y2 - y1
         length_sq = dx * dx + dy * dy
-        for py in range(max(0, int(min(y1, y2) - radius) - 1), min(self.size, int(max(y1, y2) + radius) + 2)):
+        for py in range(max(0, int(min(y1, y2) - radius) - 1), min(self.height, int(max(y1, y2) + radius) + 2)):
             for px in range(max(0, int(min(x1, x2) - radius) - 1), min(self.size, int(max(x1, x2) + radius) + 2)):
                 cx, cy = px + 0.5 - x1, py + 0.5 - y1
                 u = max(0.0, min(1.0, (cx * dx + cy * dy) / length_sq))
@@ -594,7 +607,7 @@ class Canvas:
 
     def png(self) -> bytes:
         raw = bytearray()
-        for y in range(self.size):
+        for y in range(self.height):
             raw.append(0)
             for x in range(self.size):
                 r, g, b, a = self.px[y * self.size + x]
@@ -605,13 +618,22 @@ class Canvas:
         def chunk(tag: bytes, data: bytes) -> bytes:
             return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data))
 
-        header = struct.pack(">IIBBBBB", self.size, self.size, 8, 6, 0, 0, 0)
+        header = struct.pack(">IIBBBBB", self.size, self.height, 8, 6, 0, 0, 0)
         return (
             b"\x89PNG\r\n\x1a\n"
             + chunk(b"IHDR", header)
             + chunk(b"IDAT", zlib.compress(bytes(raw), 9))
             + chunk(b"IEND", b"")
         )
+
+
+def build_time_glyph(value: int) -> bytes:
+    cv = Canvas(TIME_STYLE.width + TIME_PAIR_GAP, TIME_STYLE.height)
+    rects = segment_rects(TIME_STYLE)
+    for segment in DIGIT_SEGMENTS[value]:
+        r = rects[segment]
+        cv.round_rect(Rect(r.x + TIME_PAIR_GAP // 2, r.y, r.w, r.h), (1.0, 1.0, 1.0))
+    return cv.png()
 
 
 def hex_rgb(argb: str) -> tuple[float, float, float]:
@@ -765,6 +787,8 @@ def write(path: Path, data: str | bytes) -> None:
 
 
 def main() -> None:
+    for value in range(10):
+        write(RES / "drawable-nodpi" / f"seg_time_{value}.png", build_time_glyph(value))
     write(RES / "raw" / "watchface.xml", build_xml())
     write(RES / "values" / "strings.xml", build_strings())
     write(RES / "drawable-nodpi" / "preview.png", build_preview())
