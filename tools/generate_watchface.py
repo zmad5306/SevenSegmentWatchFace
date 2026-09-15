@@ -157,6 +157,15 @@ BATTERY_HUNDREDS = DigitStyle(width=BATTERY_T, height=BATTERY_H, thickness=BATTE
 PERCENT_W = 20
 LOW_BATTERY_COLOR = "#FFFF3B30"
 
+# User-picked complication (e.g. Gemini) centered in the free band below the date.
+SHORTCUT_SIZE = 64
+SHORTCUT_X = (CANVAS - SHORTCUT_SIZE) // 2
+SHORTCUT_Y = ROW2_Y + SMALL_STYLE.height + 10
+SHORTCUT_ICON = 40
+SHORTCUT_TEXT_ICON = 28
+# The runtime crashes unless the default provider's type (EMPTY) is also supported.
+SHORTCUT_TYPES = ("SHORT_TEXT", "MONOCHROMATIC_IMAGE", "SMALL_IMAGE", "EMPTY")
+
 
 @dataclass(frozen=True)
 class BatteryLayout:
@@ -491,6 +500,60 @@ def emit_battery(x: Xml) -> None:
     x.close("</Group>")
 
 
+def shortcut_image(x: Xml, name: str, size: int, y: int, resource: str, tint: str | None) -> None:
+    tint_attr = f' tintColor="{tint}"' if tint else ""
+    x.open(
+        f'<PartImage name="{name}" x="{(SHORTCUT_SIZE - size) // 2}" y="{y}" '
+        f'width="{size}" height="{size}"{tint_attr}>'
+    )
+    x.line(f'<Image resource="{resource}" />')
+    x.close("</PartImage>")
+
+
+def emit_shortcut(x: Xml) -> None:
+    """An empty-by-default slot; the system launches the chosen provider on tap."""
+    s = SHORTCUT_SIZE
+    x.open(
+        f'<ComplicationSlot name="shortcut" slotId="0" displayName="complication_shortcut" '
+        f'x="{SHORTCUT_X}" y="{SHORTCUT_Y}" width="{s}" height="{s}" '
+        f'supportedTypes="{" ".join(SHORTCUT_TYPES)}" isCustomizable="true">'
+    )
+    x.line(f'<BoundingOval x="0" y="0" width="{s}" height="{s}" />')
+    x.line('<DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />')
+    # Hidden while always-on: a tap there only wakes the screen.
+    x.line(f'<Variant mode="AMBIENT" target="alpha" value="0"{AMBIENT_VARIANT_ATTRS} />')
+
+    icon_y = (s - SHORTCUT_ICON) // 2
+    x.open('<Complication type="MONOCHROMATIC_IMAGE">')
+    shortcut_image(x, "shortcut_mono", SHORTCUT_ICON, icon_y, "[COMPLICATION.MONOCHROMATIC_IMAGE]", DATE_COLOR)
+    x.close("</Complication>")
+
+    x.open('<Complication type="SMALL_IMAGE">')
+    shortcut_image(x, "shortcut_small", SHORTCUT_ICON, icon_y, "[COMPLICATION.SMALL_IMAGE]", None)
+    x.close("</Complication>")
+
+    text_y = SHORTCUT_TEXT_ICON + 4
+    x.open('<Complication type="SHORT_TEXT">')
+    shortcut_image(x, "shortcut_text_icon", SHORTCUT_TEXT_ICON, 2, "[COMPLICATION.MONOCHROMATIC_IMAGE]", DATE_COLOR)
+    x.open(f'<PartText name="shortcut_text" x="0" y="{text_y}" width="{s}" height="{s - text_y}">')
+    x.open('<Text align="CENTER" ellipsis="TRUE">')
+    x.open(f'<Font family="SYNC_TO_DEVICE" size="16" color="{DATE_COLOR}">')
+    x.open("<Template>")
+    x.line("%s")
+    x.line('<Parameter expression="[COMPLICATION.TEXT]" />')
+    x.close("</Template>")
+    x.close("</Font>")
+    x.close("</Text>")
+    x.close("</PartText>")
+    x.close("</Complication>")
+
+    # Nothing is drawn until a provider is chosen.
+    x.open('<Complication type="EMPTY">')
+    x.line(f'<Group name="shortcut_empty" x="0" y="0" width="{s}" height="{s}" />')
+    x.close("</Complication>")
+    x.close("</ComplicationSlot>")
+
+
 def build_xml() -> str:
     x = Xml()
     x.line('<?xml version="1.0" encoding="utf-8"?>')
@@ -530,6 +593,7 @@ def build_xml() -> str:
     emit_battery(x)
     emit_time(x)
     emit_date(x)
+    emit_shortcut(x)
     x.close("</Scene>")
     x.close("</WatchFace>")
     return x.text()
@@ -543,6 +607,7 @@ def build_strings() -> str:
         ("config_ghost", "Unlit segments"),
         ("option_on", "On"),
         ("option_off", "Off"),
+        ("complication_shortcut", "Shortcut"),
     ] + [(f"color_{opt_id}", label) for opt_id, label, _ in PALETTE]
     body = "\n".join(f'    <string name="{k}">{v}</string>' for k, v in entries)
     return (

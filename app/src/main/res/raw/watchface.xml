@@ -1751,5 +1751,38 @@
                 </RoundRectangle>
             </PartDraw>
         </Group>
+        <ComplicationSlot name="shortcut" slotId="0" displayName="complication_shortcut" x="193" y="366" width="64" height="64" supportedTypes="SHORT_TEXT MONOCHROMATIC_IMAGE SMALL_IMAGE EMPTY" isCustomizable="true">
+            <BoundingOval x="0" y="0" width="64" height="64" />
+            <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY" />
+            <Variant mode="AMBIENT" target="alpha" value="0" duration="0.1" />
+            <Complication type="MONOCHROMATIC_IMAGE">
+                <PartImage name="shortcut_mono" x="12" y="12" width="40" height="40" tintColor="[CONFIGURATION.dateColor.0]">
+                    <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                </PartImage>
+            </Complication>
+            <Complication type="SMALL_IMAGE">
+                <PartImage name="shortcut_small" x="12" y="12" width="40" height="40">
+                    <Image resource="[COMPLICATION.SMALL_IMAGE]" />
+                </PartImage>
+            </Complication>
+            <Complication type="SHORT_TEXT">
+                <PartImage name="shortcut_text_icon" x="18" y="2" width="28" height="28" tintColor="[CONFIGURATION.dateColor.0]">
+                    <Image resource="[COMPLICATION.MONOCHROMATIC_IMAGE]" />
+                </PartImage>
+                <PartText name="shortcut_text" x="0" y="32" width="64" height="32">
+                    <Text align="CENTER" ellipsis="TRUE">
+                        <Font family="SYNC_TO_DEVICE" size="16" color="[CONFIGURATION.dateColor.0]">
+                            <Template>
+                                %s
+                                <Parameter expression="[COMPLICATION.TEXT]" />
+                            </Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+            <Complication type="EMPTY">
+                <Group name="shortcut_empty" x="0" y="0" width="64" height="64" />
+            </Complication>
+        </ComplicationSlot>
     </Scene>
 </WatchFace>

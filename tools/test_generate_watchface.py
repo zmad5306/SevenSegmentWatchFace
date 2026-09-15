@@ -60,6 +60,24 @@ class AmbientClockTests(unittest.TestCase):
                 self.assertEqual(pixels[y * stride + 4], 0)
                 self.assertEqual(pixels[y * stride + width * 4], 0)
 
+    def test_shortcut_slot(self):
+        root = ET.fromstring(face.build_xml())
+        slots = root.findall('.//ComplicationSlot')
+        self.assertEqual(len(slots), 1)
+        slot = slots[0]
+        self.assertFalse(slot.findall('.//DigitalClock'))
+        x, y = int(slot.get('x')), int(slot.get('y'))
+        w, h = int(slot.get('width')), int(slot.get('height'))
+        self.assertGreaterEqual(y, face.ROW2_Y + face.SMALL_STYLE.height)
+        self.assertGreaterEqual(x, 0)
+        self.assertLessEqual(x + w, face.CANVAS)
+        self.assertLessEqual(y + h, face.CANVAS)
+        rendered = {c.get('type') for c in slot.findall('./Complication')}
+        supported = set(slot.get('supportedTypes').split())
+        self.assertEqual(supported, rendered)
+        # The runtime throws if the fallback type isn't in supportedTypes.
+        self.assertIn(slot.find('DefaultProviderPolicy').get('defaultSystemProviderType'), supported)
+
     def test_generated_xml_is_current(self):
         self.assertEqual(face.build_xml(), (face.RES / 'raw/watchface.xml').read_text(encoding='utf-8'))
 
