@@ -6,5 +6,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "SevenSegmentWatchFace"
-include(":app")
+rootProject.name = "WatchFace"
+include(":seven-segment")

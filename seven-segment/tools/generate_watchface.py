@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Generates the 7-segment Watch Face Format resources.
 
-Outputs (relative to the repo root):
-  app/src/main/res/raw/watchface.xml        - the WFF scene
-  app/src/main/res/values/strings.xml       - labels used by the editor
-  app/src/main/res/drawable-nodpi/preview.png - picker preview
-  app/src/main/res/drawable-nodpi/seg_time_*.png - native clock bitmap glyphs
-  app/src/main/res/drawable-nodpi/cfg_*.png   - editor icons for each setting
-  app/src/main/res/drawable/ic_launcher_foreground.xml, mipmap-anydpi/ic_launcher.xml - app icon
+Outputs (relative to this watch face project):
+  src/main/res/raw/watchface.xml        - the WFF scene
+  src/main/res/values/strings.xml       - labels used by the editor
+  src/main/res/drawable-nodpi/preview.png - picker preview
+  src/main/res/drawable-nodpi/seg_time_*.png - native clock bitmap glyphs
+  src/main/res/drawable-nodpi/cfg_*.png   - editor icons for each setting
+  src/main/res/drawable/ic_launcher_foreground.xml, mipmap-anydpi/ic_launcher.xml - app icon
 
 Time uses native DigitalClock text with generated seven-segment bitmap glyphs
 so Wear OS can advance it on the low-power display. Date and battery digits
 use conditional pill-shaped RoundRectangles. Standard library only.
 
-Run from anywhere:  python tools/generate_watchface.py
+Run from anywhere:  python seven-segment/tools/generate_watchface.py
 """
 
 import math
@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-RES = ROOT / "app" / "src" / "main" / "res"
+RES = ROOT / "src" / "main" / "res"
 
 CANVAS = 450
 

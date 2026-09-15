@@ -8,7 +8,7 @@ local.properties
 .kotlin/
 
 # Signed bundles/APKs and R8 mapping from Android Studio's "Generate Signed App Bundle".
-/app/release/
+/*/release/
 
 # Signing keys never belong in the repo.
 *.jks
