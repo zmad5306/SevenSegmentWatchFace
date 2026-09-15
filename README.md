@@ -12,7 +12,8 @@ A 7-segment LCD-style watch face for Wear OS, built with [Watch Face Format](htt
   - **Time color**: 11 presets.
   - **Date color**: the same presets. It also colors the battery indicator.
   - **Unlit segments**: the faint "ghost 8" behind the lit segments.
-- In always-on mode, ghost segments are hidden and date/battery graphics are dimmed. The time stays opaque; the watch lowers display brightness.
+  - **Shortcut**: a complication slot below the date, empty by default. Set it to **Gemini** (or any app shortcut) and tap it to launch. Monochrome icons follow the date color.
+- In always-on mode, ghost segments and the shortcut are hidden and date/battery graphics are dimmed. The time stays opaque; the watch lowers display brightness.
 
 ## Layout
 `tools/generate_watchface.py` is the source of truth. It writes these files:
